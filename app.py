@@ -5,6 +5,14 @@ import joblib
 from keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
 from flask_cors import CORS
+import os
+import psutil
+from waitress import serve
+import tensorflow as tf
+gpus = tf.config.experimental.list_physical_devices('GPU')
+for gpu in gpus:
+    tf.config.experimental.set_memory_growth(gpu, True)
+tf.config.optimizer.set_jit(True)  # Enable XLA compilation
 
 app = Flask(__name__)
 CORS(app)
@@ -13,6 +21,18 @@ CORS(app)
 wind_model = load_model('models/wind_model.h5', custom_objects={'mse': 'mse'})
 wind_scaler = joblib.load('models/wind_scaler.pkl')
 electric_model = joblib.load('models/electric_load_model.pkl')
+
+# Add memory check middleware
+@app.before_request
+def check_memory():
+    if psutil.virtual_memory().percent > 90:
+        return jsonify({"error": "Server overloaded"}), 503
+
+# Modify the main block
+if __name__ == '__main__':
+    # Production settings
+    port = int(os.environ.get("PORT", 10000))
+    serve(app, host='0.0.0.0', port=port)
 
 @app.route('/')
 def home():
