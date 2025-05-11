@@ -9,10 +9,8 @@ import os
 import psutil
 from waitress import serve
 import tensorflow as tf
-gpus = tf.config.experimental.list_physical_devices('GPU')
-for gpu in gpus:
-    tf.config.experimental.set_memory_growth(gpu, True)
 tf.config.optimizer.set_jit(True)  # Enable XLA compilation
+tf.config.set_soft_device_placement(True)  # Better CPU fallback
 
 app = Flask(__name__)
 CORS(app)
