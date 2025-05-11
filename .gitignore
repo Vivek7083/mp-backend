@@ -1,4 +1,4 @@
 myenv
-data
-plots
-templates
+/data
+/plots
+/templates
