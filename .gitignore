@@ -2,3 +2,4 @@ myenv
 ./data
 ./plots
 ./templates
+./static
